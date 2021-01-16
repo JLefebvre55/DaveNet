@@ -1,6 +1,10 @@
 {
-    "host": "localhost",
-    "user": "dave",
-    "password": "password",
-    "database": "davedb"
+    "login" :
+        {
+            "host": "45.78.160.226",
+            "user": "remote",
+            "password": "jayden12",
+            "database": "davedb"
+        },
+    "table" : "sensordata"
 }

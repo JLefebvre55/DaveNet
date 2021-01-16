@@ -19,6 +19,38 @@ var server = http.createServer(app).listen(port, function(){
 
 var socketlistener = socket.listen(server);
 const NUMROWS = 10
+const SETTINGS = JSON.parse(fs.readFileSync('database.json'));
+
+var database = mysql.createConnection(SETTINGS.login);
+
+while(database.state == "disconnected"){
+	database.connect(function(err) {
+		if (err) throw err;
+	});
+}
+console.log("Connected to database!");
+
+function getLatest(rows){
+	console.log("Querying last "+rows+" from database...")
+	data = database.query("SELECT id FROM "+SETTINGS.table+" ORDER BY id DESC LIMIT "+rows, function (err, result) {
+		if (err) throw err;
+		return result;
+	});
+	console.log("Last"+rows+" collected:")
+	console.log(data)
+	data.forEach(point => {
+		console.log(point)
+	});
+	return data;
+}
+
+//On socket connect
+socketlistener.on('connection', (socket) => {
+	console.log("Someone connected: "+socket.id);
+	data = getLatest(NUMROWS);
+	socket.emit('data', data);
+	console.log("Pushed data to socket.")
+});
 
 //File GETs
 app.get('/', (request, response) => {
@@ -33,40 +65,3 @@ app.get('/style.css', (request, response) => {
 	response.sendFile(path.join(__dirname+'/style.css'));
 });
 
-var databaseLogin = JSON.parse(fs.readFileSync('database.json'));
-
-var database = mysql.createConnection(databaseLogin);
-
-database.connect(function(err) {
-	if (err) throw err;
-	console.log("Connected to database!");
-});
-
-function getData(rows){
-	console.log("Collecting last "+rows+" from database...")
-	latest = database.query("SELECT id FROM sensordata", function (err, result) {
-		if (err) throw err;
-		return result;
-	});
-	console.log("Latest entry id: "+latest);
-	data = [];
-	var i;
-	for(i = latest-rows+1; i <= latest; i++){
-		temp = database.query("SELECT * FROM sensordata WHERE id = "+i, function (err, result) {
-			if (err) throw err;
-			return result;
-		});
-		console.log("Retrieved row "+i+" from database.")
-		console.log(temp)
-		data.push(temp)
-	}
-	console.log("All data collected.")
-}
-
-//On socket connect
-socketlistener.on('connection', (socket) => {
-	console.log("Someone connected: "+socket.id);
-	data = getData(NUMROWS);
-	socket.emit('data', data);
-	console.log("Pushed data to socket.")
-});

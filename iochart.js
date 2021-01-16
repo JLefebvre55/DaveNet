@@ -5,26 +5,25 @@ const socket = io.connect(window.location.href)
 
 //console.log("test")
 
-var table = document.getElementById("chartTable");
-
-socket.on('chartsetup', function(data) {
+socket.on('data', function(data) {
 	
-	console.log("Making first datasets");
-
-	setup = data;
+	console.log("Received data:");
+	data.forEach(point => {
+		console.log(point)
+	});
 	
 	//console.log(data);
 	var parent = document.getElementById('allCharts');
 	
 	//Make chart for each IO input
-	setup.sensors.forEach((sensor) => {
+	/*data.forEach((sensor) => {
 		
 		
 		console.log("Making chart for '"+sensor.name+"'");
 		
 		/*var heading = document.createElement("h2");
 		heading.textContent = sensor.name+" ("+sensor.type.substring(0, 1).toUpperCase()+sensor.type.substring(1).toLowerCase()+")";
-		*/
+		
 		var div = document.createElement("div");
 		div.setAttribute("class", "chart-container");
 		var canvas = document.createElement("canvas");
@@ -75,9 +74,9 @@ socket.on('chartsetup', function(data) {
 		newchart.options.scales.yAxes[0].ticks.stepSize = (sensor.max-sensor.min)/6;
 		
 		charts.push({id: sensor.name, chart: newchart});
-	})
+	})*/
 })
-
+/*
 socket.on('chartdata', function(data) { //As an arduino io dataset is received 
 	
 	console.log(data)
@@ -102,4 +101,4 @@ socket.on('chartdata', function(data) { //As an arduino io dataset is received
 			chart.chart.update(); //Update the graph.
 		})
 	}
-});
+});*/
